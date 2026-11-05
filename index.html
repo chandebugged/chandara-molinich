@@ -115,7 +115,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .col { width: min(100%, 560px); margin-inline: auto; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
 .details { position: relative; overflow-x: clip; }
 
-.hero { min-height: 100vh; min-height: 100svh; display: grid; align-content: center; justify-items: center; gap: 8px; text-align: center; padding: 40px 20px; position: relative; }
+.hero { min-height: 100vh; min-height: 100svh; display: grid; align-content: center; justify-items: center; gap: 8px; text-align: center; padding: 40px 20px 8px; position: relative; }
 .hero-tag { position: relative; display: block; width: min(60vw, 40vh, 290px); aspect-ratio: 580 / 730; padding: 0; border: 0; background: none; cursor: pointer; margin-block: 16px; will-change: transform; }
 .hero-tag .tag-olive { visibility: hidden; }
 .js .hero-tag.wait { visibility: hidden; }
@@ -126,29 +126,21 @@ button { -webkit-tap-highlight-color: transparent; }
 .cue { width: 1px; height: 40px; margin-top: 8px; background: linear-gradient(var(--accent), transparent); transform-origin: 50% 0; animation: cue 3.6s ease-in-out infinite; }
 @keyframes cue { 0% { transform: scaleY(0); opacity: 1; } 60% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
 
-/* Photo scenes: each photo is held still while it settles, then the next part rises over it as it fades */
-.scene { position: relative; z-index: 0; height: calc(var(--h, 170) * 1vh); height: calc(var(--h, 170) * 1svh); }
-.stick { position: sticky; top: 0; height: 100vh; height: 100svh; display: grid; grid-template-rows: minmax(0, 1fr) auto; overflow: hidden; padding-top: max(16px, env(safe-area-inset-top, 0px)); }
-.scene, .story.pinned, .stick, .story.pinned .story-stage { pointer-events: none; }
-.frame img, .cap button, .layer img, .more { pointer-events: auto; }
-.frame { position: relative; min-height: 0; }
+/* Photo scenes: one thing at a time, in order, with the same small gap between them. A photo pauses in the
+   middle of the screen while it settles, then moves on with what follows directly beneath it. */
+:root { --gap: 16px; }
+.scene, .story, .mapstage, footer { margin-top: var(--gap); }
+.scene { position: relative; }
+.scene::after { content: ""; display: block; height: calc(var(--pin, 0) * 1vh); height: calc(var(--pin, 0) * 1svh); }
+.stick { position: sticky; top: 0; display: grid; }
+.frame { position: relative; aspect-ratio: 2 / 3; width: 100%; max-height: calc(100vh - 190px); max-height: calc(100svh - 190px); }
 .frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-.wide .stick { grid-template-rows: auto auto; align-content: center; }
-.wide .frame { aspect-ratio: 3 / 2; max-height: 68vh; }
-.wide .cap h2 { font-size: clamp(1.05rem, 4.7vw, 1.5rem); white-space: nowrap; }
-.scene.nearby .frame, .scene.nearby .frame img, .scene.nearby .cap, .story.nearby .layer, footer.nearby .foot-photo img, .hero.nearby { will-change: transform, opacity; }
-.over { position: relative; z-index: 2; margin-top: -36vh; margin-top: -36svh; }
-.under { margin-top: -22vh; margin-top: -22svh; }
-.cross, .over.cross { margin-top: -60vh; margin-top: -60svh; }
-.sheet, .when-block, .morning-wrap, .programme, .place, .apology { position: relative; z-index: 2; }
-.story { position: relative; z-index: 0; }
-.story.pinned { height: calc((var(--n) * 78 + 100) * 1vh); height: calc((var(--n) * 78 + 100) * 1svh); }
-.story-stage { display: grid; gap: 14px; padding-block: 24px; }
-.story.pinned .story-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; display: block; padding: 0; }
-.story.pinned .layer { position: absolute; inset: 0; opacity: 0; visibility: hidden; }
+.wide .frame { aspect-ratio: 3 / 2; }
+.scene.nearby .frame img, .scene.nearby .cap, footer.nearby .foot-photo img, .story.nearby .layer, .story.nearby .layer img { will-change: transform, opacity; }
+.story-stage { display: grid; gap: var(--gap); }
 .layer img { width: 100%; height: auto; }
-.story.pinned .layer img { height: 100%; object-fit: contain; }
-.cap { display: grid; justify-items: center; gap: 6px; padding: 16px 24px calc(26px + env(safe-area-inset-bottom, 0px)); min-height: 112px; align-content: center; text-align: center; }
+@media (min-width: 820px) { .story-stage { justify-items: center; } .layer img { width: auto; max-width: 100%; max-height: calc(100vh - 32px); } }
+.cap { display: grid; justify-items: center; gap: 6px; padding: 14px 24px 4px; min-height: 96px; align-content: center; text-align: center; }
 .cap h2 { font: 400 clamp(1.3rem, 5.6vw, 1.8rem)/1.7 var(--pen); }
 .cap .line { display: block; white-space: nowrap; line-height: 1.6; }
 .cap p { font-size: .84rem; color: var(--dim); }
@@ -157,7 +149,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .bigdate span:first-child { text-align: right; } .bigdate span:last-child { text-align: left; }
 
 /* Letter: the printed card, double rule and corner flourishes */
-.sheet { padding-block: 48px 40px; }
+.sheet { padding-block: var(--gap) 0; }
 .card { --ink: #3f4422; --dim: rgba(63, 68, 34, .74); --accent: #8a7238; --hair: rgba(138, 114, 56, .36); position: relative; background: #f7f4e1 var(--grain); color: var(--ink); border-radius: 18px; padding: 44px 22px 118px; box-shadow: 0 34px 60px -34px rgba(0, 0, 0, .9); }
 .card::before { content: ""; position: absolute; inset: 8px; border: 1px solid var(--olive); border-radius: 13px; opacity: .65; pointer-events: none; }
 .card::after { content: ""; position: absolute; inset: 12px; border: 1px solid var(--olive); border-radius: 10px; opacity: .28; pointer-events: none; }
@@ -185,9 +177,9 @@ button { -webkit-tap-highlight-color: transparent; }
 .count div + div { border-left: 1px solid var(--hair); }
 .count b { font: 400 1.5rem/1.5 var(--pen); color: var(--accent); }
 .count span { font-size: .68rem; line-height: 1.6; color: var(--dim); }
-.morning-wrap { padding-bottom: 44px; }
+.morning-wrap { padding-block: var(--gap) 0; }
 .morning-wrap[hidden] { display: none; }
-.when-block { padding-block: 40px 44px; display: grid; gap: 8px; text-align: center; justify-items: center; color: var(--dim); font-size: .88rem; text-wrap: balance; }
+.when-block { padding-block: 24px 8px; display: grid; gap: 8px; text-align: center; justify-items: center; color: var(--dim); font-size: .88rem; text-wrap: balance; }
 .btn { display: inline-block; margin-top: 14px; padding: 6px 24px; text-decoration: none; font: 400 .82rem/1.9 var(--ui); color: var(--ink); border: 1px solid var(--hair); transition: background-color .6s ease; }
 .btn:hover { background: rgba(224, 195, 137, .1); }
 .note { position: relative; z-index: 1; display: grid; gap: 12px; text-align: center; justify-items: center; font-family: var(--print); }
@@ -195,7 +187,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .note p { font-size: .9rem; text-wrap: pretty; }
 
 /* Programme */
-.programme { padding-block: 36px 56px; }
+.programme { padding-block: 24px 8px; }
 .tl { position: relative; padding-left: 52px; z-index: 1; }
 .rail, .rail-fill { position: absolute; left: 17.5px; top: 18px; bottom: 26px; width: 1px; }
 .rail { background: rgba(224, 195, 137, .16); }
@@ -214,6 +206,12 @@ button { -webkit-tap-highlight-color: transparent; }
 .ev time { font: 400 1.14rem/1.7 var(--pen); }
 .ev .d { font-size: .86rem; line-height: 1.85; color: var(--dim); text-wrap: pretty; }
 
+/* Photo sets held in place while the scroll moves through them */
+.story.on::after { content: ""; display: block; height: calc(var(--pin, 100) * 1vh); height: calc(var(--pin, 100) * 1svh); }
+.story.on .story-stage { display: block; position: sticky; top: 0; overflow: hidden; }
+.story.on .layer { position: absolute; left: 0; top: 0; }
+.story.on .layer img { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: contain; }
+
 /* Dress colours: a quiet suggestion under the suit and dress */
 .dress-cap h2 { font: 400 1rem/1.7 var(--pen); }
 .dress-cap p { font-size: .76rem; line-height: 1.7; }
@@ -222,7 +220,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .tone i { width: 18px; height: 18px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1px rgba(247, 244, 225, .24); transition: transform .6s var(--slow), box-shadow .6s ease; }
 .tone[aria-pressed="true"] i { transform: scale(1.3); box-shadow: 0 0 0 1px var(--gold); }
 .dress-cap { position: relative; isolation: isolate; }
-.dress-cap::before { content: ""; position: absolute; inset: -30px 0 0; z-index: -1; background-color: var(--wash, #d9ccb0); opacity: .42; transition: background-color 1.3s ease; -webkit-mask-image: linear-gradient(transparent, #000 62%); mask-image: linear-gradient(transparent, #000 62%); }
+.dress-cap::before { content: ""; position: absolute; inset: 0; z-index: -1; background-color: var(--wash, #d9ccb0); opacity: .42; transition: background-color 1.3s ease; -webkit-mask-image: linear-gradient(transparent, #000 62%); mask-image: linear-gradient(transparent, #000 62%); }
 
 /* Map: an illustrated city, moved only by the compositor */
 .mapstage { position: relative; height: 100vh; height: 100svh; overflow: hidden; background: #23271a; perspective: 1200px; perspective-origin: 50% 36%; contain: paint; }
@@ -235,8 +233,7 @@ button { -webkit-tap-highlight-color: transparent; }
 @keyframes ping { from { transform: scale(.4); opacity: .8; } to { transform: scale(1.5); opacity: 0; } }
 .fog { position: absolute; left: 0; right: 0; top: 0; height: 30%; background: linear-gradient(var(--ground) 12%, rgba(31, 34, 20, 0)); z-index: 2; pointer-events: none; }
 .fog.b { top: auto; bottom: 0; height: 14%; background: linear-gradient(rgba(31, 34, 20, 0), var(--ground)); }
-.arrive { position: absolute; left: 50%; bottom: 44%; width: 82px; margin-left: -41px; margin-bottom: 22px; z-index: 4; transform-origin: 50% 100%; opacity: 0; color: #f6e8c3; isolation: isolate; }
-.arrive::before { content: ""; position: absolute; inset: -30px; z-index: -1; border-radius: 50%; background: radial-gradient(closest-side, rgba(31, 34, 20, .94) 52%, rgba(31, 34, 20, 0)); }
+.arrive { position: absolute; left: 50%; bottom: 44%; width: 44px; margin-left: -22px; z-index: 4; transform-origin: 50% 100%; opacity: 0; filter: drop-shadow(0 4px 5px rgba(0, 0, 0, .5)); }
 .arrive svg { width: 100%; height: auto; }
 .nav-card { position: absolute; left: 14px; right: 14px; top: calc(14px + env(safe-area-inset-top, 0px)); z-index: 5; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 6px 14px 6px 8px; background: rgba(31, 34, 20, .92); border: 1px solid var(--hair); color: var(--ink); font-family: var(--ui); }
 .nav-ic { width: 30px; height: 30px; display: grid; place-items: center; color: var(--gold); }
@@ -246,14 +243,14 @@ button { -webkit-tap-highlight-color: transparent; }
 .replay { position: absolute; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 5; transform: translateX(-50%); padding: 3px 16px; border: 1px solid var(--hair); background: rgba(31, 34, 20, .92); font: 400 .76rem/1.9 var(--ui); cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .8s ease; }
 .replay.on { opacity: 1; pointer-events: auto; }
 .credit { position: absolute; right: 8px; bottom: 4px; z-index: 5; font: 500 9px/1.4 var(--lat); color: var(--dim); }
-.place { padding-block: 40px 44px; display: grid; gap: 12px; justify-items: center; text-align: center; }
+.place { padding-block: 24px 8px; display: grid; gap: 12px; justify-items: center; text-align: center; }
 .place h2 { font: 400 clamp(1.25rem, 5vw, 1.6rem)/1.7 var(--pen); }
 .place p { color: var(--dim); font-size: .88rem; text-wrap: balance; }
 .qr { width: 96px; padding: 7px; margin-top: 10px; background: var(--paper); }
 .qr svg { width: 100%; height: auto; }
 .scan { font: 400 .76rem/1.8 var(--ui); color: var(--dim); }
 
-.apology { padding-block: 44px 40px; }
+.apology { padding-block: var(--gap) 0; }
 
 /* Closing: the held hands fill the screen, the thanks rest on them */
 footer { position: relative; min-height: 100vh; min-height: 100svh; overflow: hidden; display: grid; align-content: end; justify-items: center; gap: 8px; padding: 0 16px calc(84px + env(safe-area-inset-bottom, 0px)); text-align: center; color: var(--gold); }
@@ -269,10 +266,6 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
 
 /* Photo viewer: tap a photo, swipe through them all */
 .frame img, .layer img, .foot-photo { cursor: zoom-in; }
-.more { position: absolute; left: max(14px, env(safe-area-inset-left, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 3; width: 34px; height: 34px; padding: 0; border-radius: 50%; border: 1px solid var(--hair); background: rgba(31, 34, 20, .7); cursor: pointer; }
-.more::before, .more::after { content: ""; position: absolute; left: 50%; top: 50%; width: 11px; height: 1px; margin: -.5px 0 0 -5.5px; background: var(--accent); }
-.more::after { transform: rotate(90deg); }
-.story:not(.pinned) .more { display: none; }
 .viewer { position: fixed; inset: 0; z-index: 30; background: #14160c; opacity: 0; pointer-events: none; transition: opacity .5s ease; overscroll-behavior: contain; }
 .viewer[hidden] { display: none; }
 .viewer.on { opacity: 1; pointer-events: auto; }
@@ -303,7 +296,6 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
 
 @media (min-width: 820px) {
   .col { width: min(100%, 640px); }
-  .frame { margin-inline: 40px; }
   .card { padding: 64px 56px 132px; }
   .corner { width: 84px; }
 }
@@ -383,14 +375,14 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     <div class="cue rv" aria-hidden="true"></div>
   </header>
 
-  <section class="scene" style="--h:210" data-scene="grow">
+  <section class="scene" style="--pin:45" data-scene="grow">
     <div class="stick">
       <div class="frame"><img class="ph" src="ph-bouquet.jpg" alt="កូនកំលោះ និងកូនក្រមុំ ជាមួយភួងផ្កាឈូកពណ៌ស" decoding="async"></div>
       <div class="cap"><h2><span class="line">ងួនសៅ ច័ន្ទតារា</span><span class="line">សុខ ម៉ូលីនិច</span></h2></div>
     </div>
   </section>
 
-  <section class="sheet col over" id="sec-letter">
+  <section class="sheet col" id="sec-letter">
     <div class="card rv">
     <div class="corner l"></div><div class="corner r"></div>
     <div class="letter">
@@ -412,7 +404,7 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     </div>
   </section>
 
-  <section class="scene under" style="--h:180" data-scene="drift">
+  <section class="scene" style="--pin:35" data-scene="drift">
     <div class="stick">
       <div class="frame"><img class="ph" src="ph-pinky.jpg" alt="ម្រាមដៃកូនកំលោះ និងកូនក្រមុំ" decoding="async"></div>
       <div class="cap">
@@ -423,7 +415,7 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     </div>
   </section>
 
-  <section class="col when-block rv over">
+  <section class="col when-block rv">
     <div class="crest" data-crest aria-hidden="true"><div class="crest-mono" data-mono></div><div class="crest-leaves" data-leaves></div></div>
     <div class="count" id="count" hidden aria-label="ពេលវេលានៅសល់">
       <div><b id="cdD"></b><span>ថ្ងៃ</span></div><div><b id="cdH"></b><span>ម៉ោង</span></div><div><b id="cdM"></b><span>នាទី</span></div><div><b id="cdS"></b><span>វិនាទី</span></div>
@@ -444,14 +436,14 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     </div></div>
   </section>
 
-  <section class="scene under" style="--h:170" id="sec-prog" data-scene="drift">
+  <section class="scene" style="--pin:35" id="sec-prog" data-scene="drift">
     <div class="stick">
       <div class="frame"><img class="ph" src="ph-veil.jpg" alt="កូនកំលោះ និងកូនក្រមុំនៅក្រោមស្បៃវែង" decoding="async"></div>
       <div class="cap"><h2>កម្មវិធីមង្គលអាពាហ៍ពិពាហ៍</h2><p>ថ្ងៃអាទិត្យ ទី២២ ខែវិច្ឆិកា ឆ្នាំ២០២៦</p></div>
     </div>
   </section>
 
-  <section class="col programme over">
+  <section class="col programme">
     <div style="margin-bottom:24px"><div class="crest" data-crest aria-hidden="true"><div class="crest-mono" data-mono></div><div class="crest-leaves" data-leaves></div></div></div>
 
     <div class="tl" id="tl">
@@ -463,7 +455,7 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     </div>
   </section>
 
-  <section class="scene under" style="--h:170" id="sec-dress" data-scene="drift" data-next="cross">
+  <section class="scene" style="--pin:35" id="sec-dress" data-scene="drift">
     <div class="stick">
       <div class="frame"><img class="ph" src="ph-attire.jpg" alt="អាវធំខ្មៅ និងរ៉ូបពណ៌សព្យួរជាមួយគ្នា" decoding="async"></div>
       <div class="cap dress-cap">
@@ -479,18 +471,18 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     </div>
   </section>
 
-  <section class="scene wide cross" style="--h:150" data-scene="drift" data-next="cross">
+  <section class="scene wide" data-scene="drift">
     <div class="stick">
       <div class="frame"><img class="ph" src="ph-cafe.jpg" alt="កូនកំលោះថតរូបកូនក្រមុំ នៅមុខហាងពណ៌លឿង" decoding="async"></div>
       <div class="cap"><h2>របៀបធ្វើដំណើរមកកាន់ទីតាំង</h2></div>
     </div>
   </section>
 
-  <section class="mapstage over cross" id="sec-map">
+  <section class="mapstage" id="sec-map">
     <div class="tilt" id="tilt"><div class="cam" id="cam"><img id="mapImg" alt="" width="1470" height="2873" decoding="async"></div></div>
     <div class="fog"></div><div class="fog b"></div>
     <div class="me" id="me"></div>
-    <div class="arrive" id="arrive" data-mono aria-hidden="true"></div>
+    <div class="arrive" id="arrive" aria-hidden="true"><svg viewBox="0 0 44 58"><path fill-rule="evenodd" d="M22 1C10.400 1 1 10.400 1 22c0 15.200 21 35 21 35s21-19.800 21-35C43 10.400 33.600 1 22 1Zm0 29a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z" fill="#e0c389" stroke="#1f2214" stroke-width="1.200"/></svg></div>
     <div class="nav-card" aria-hidden="true">
       <div class="nav-ic"><svg viewBox="0 0 24 24" id="navIc"><path d="M12 4v15M6 13l6 6 6-6"/></svg></div>
       <div class="nav-road" id="navRoad">មហាវិថីព្រះមុនីវង្ស</div>
@@ -509,16 +501,15 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     <a class="btn rv" href="https://maps.app.goo.gl/NR2HSBo1tuWhs7f39" target="_blank" rel="noopener">បើកផែនទី</a>
   </section>
 
-  <section class="story under" style="--n:3" aria-label="រូបថត">
+  <section class="story ribbon" style="--pin:130" aria-label="រូបថត">
     <div class="story-stage">
-      <button class="more" type="button" aria-label="មើលរូបថត"></button>
       <div class="layer"><img class="ph" src="ph-seated.jpg" alt="កូនកំលោះកាន់កាមេរ៉ា អង្គុយក្បែរកូនក្រមុំ" decoding="async"></div>
       <div class="layer"><img class="ph" src="ph-flowers.jpg" alt="កូនកំលោះថតរូបកូនក្រមុំកាន់ភួងផ្កា" decoding="async"></div>
       <div class="layer"><img class="ph" src="ph-grass.jpg" alt="កូនកំលោះ និងកូនក្រមុំអង្គុយលើស្មៅ" decoding="async"></div>
     </div>
   </section>
 
-  <section class="col apology over">
+  <section class="col apology">
     <div class="card rv"><div class="corner l"></div><div class="corner r"></div>
     <div class="note">
       <div class="mark" data-mono aria-hidden="true"></div>
@@ -528,16 +519,15 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     </div></div>
   </section>
 
-  <section class="story under" style="--n:3" data-next="cross" aria-label="រូបថតសខ្មៅ">
+  <section class="story wipe" style="--pin:150" aria-label="រូបថតសខ្មៅ">
     <div class="story-stage">
-      <button class="more" type="button" aria-label="មើលរូបថត"></button>
       <div class="layer"><img class="ph" src="ph-run.jpg" alt="កូនកំលោះ និងកូនក្រមុំកាន់ដៃគ្នារត់លើស្មៅ" decoding="async"></div>
-      <div class="layer" data-zoom><img class="ph" src="ph-veilbw.jpg" alt="កូនកំលោះ និងកូនក្រមុំក្រោមស្បៃ រូបសខ្មៅ" decoding="async"></div>
+      <div class="layer"><img class="ph" src="ph-veilbw.jpg" alt="កូនកំលោះ និងកូនក្រមុំក្រោមស្បៃ រូបសខ្មៅ" decoding="async"></div>
       <div class="layer"><img class="ph" src="ph-veilclose.jpg" alt="មុខកូនកំលោះ និងកូនក្រមុំក្រោមស្បៃ រូបសខ្មៅ" decoding="async"></div>
     </div>
   </section>
 
-  <footer id="end" class="over cross">
+  <footer id="end">
     <div class="foot-photo"><img class="ph" src="ph-hands.jpg" alt="ដៃកូនកំលោះ និងកូនក្រមុំកាន់គ្នា" decoding="async"></div>
     <button class="end-seal rv" id="endSeal" type="button" aria-label="ជូនពរ" data-mono></button>
     <p class="thanks rv">សូមអរគុណ</p>
@@ -826,15 +816,16 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
 
   // ---- One loop drives every scene. It eases towards the scroll position, so a phone's stepped
   // scroll events still give a continuous motion. Offsets are cached, and only transform and opacity change.
-  var scenes = [], vh = innerHeight, looping = false, cur = 0, lastNow = 0, OVER = 0;
+  var scenes = [], vh = innerHeight, looping = false, cur = 0, lastNow = 0;
   var clamp = function (v) { return Math.max(0, Math.min(1, v)); };
   var ease = function (u) { return u * u * (3 - 2 * u); };
   var started = false;
   function pageTop(el) { var t = 0; while (el) { t += el.offsetTop; el = el.offsetParent; } return t; }
   function put(el, prop, val) { var k = '_' + prop; if (el[k] !== val) { el[k] = val; el.style[prop] = val; } }
   function measure() {
-    vh = innerHeight; OVER = vh * .36;
-    scenes.forEach(function (sc) { sc.top = pageTop(sc.el); sc.h = sc.el.offsetHeight; if (sc.size) sc.size(); });
+    vh = innerHeight;
+    scenes.forEach(function (sc) { if (sc.size) sc.size(); });
+    scenes.forEach(function (sc) { sc.top = pageTop(sc.el); sc.h = sc.el.offsetHeight; if (sc.after) sc.after(); });
   }
   function draw(y) {
     scenes.forEach(function (sc) {
@@ -855,62 +846,65 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
   function ask() { if (!looping) { looping = true; lastNow = performance.now(); requestAnimationFrame(tick); } }
 
   var dockFrame = function () {};
-  // How far a photo has given way (x), and how much of it still shows (o). Under words it stays as a dim
-  // backdrop until it has scrolled off; before another photo or the map it dissolves into what arrives.
-  var gone = { x: 0, o: 1 };
-  function leaving(sc, y, next) {
-    var end = sc.top + sc.h - vh, span = next === 'cross' ? vh * .6 : OVER;
-    gone.x = ease(clamp((y - (end - span)) / (span * .9)));
-    gone.o = next === 'cross' || next === 'fade' ? 1 - gone.x : (1 - gone.x * .84) * (1 - clamp((y - end) / (vh * .6)));
-    return gone;
-  }
-  function arriving(sc, y) { return ease(clamp((y - (sc.top - vh)) / (vh * .45))); }
   function startPage() {
     if (started) return;
     started = true;
     showHero();
     document.querySelectorAll('.rv').forEach(function (el) { if (seen) seen.observe(el); else el.classList.add('in'); });
     if (!still) {
-      // The opening drifts back and fades as the first photo arrives
-      var hero = document.querySelector('.hero');
-      scenes.push({ el: hero, run: function (y) {
-        var u = clamp((y - this.top) / vh);
-        put(hero, 'transform', 'translate3d(0,' + (u * vh * .22).toFixed(1) + 'px,0)');
-        put(hero, 'opacity', (1 - ease(clamp(u * 1.5))).toFixed(3));
-      } });
-      // A photo fades up and settles to its full size, always whole, then gives way to what follows
+      // A photo settles to its full size on its way to the middle of the screen, always whole
       document.querySelectorAll('[data-scene]').forEach(function (el) {
-        var grow = el.dataset.scene === 'grow', box = el.querySelector('.frame'), img = el.querySelector('.frame img'), cap = el.querySelector('.cap'), next = el.dataset.next || 'text', from = grow ? .78 : .92;
-        scenes.push({ el: el, run: function (y) {
-          var e = arriving(this, y);
-          var hold = Math.max(1, this.h - vh);
-          var g = 1 - Math.pow(1 - clamp((y - (this.top - vh * .5)) / (hold * .55 + vh * .5)), 2.2);
-          var lv = leaving(this, y, next), x = lv.x;
+        var grow = el.dataset.scene === 'grow', stickEl = el.querySelector('.stick'), img = el.querySelector('.frame img'), cap = el.querySelector('.cap'), from = grow ? .9 : .95, sh = 0;
+        scenes.push({ el: el, size: function () {
+          sh = stickEl.offsetHeight;
+          stickEl.style.top = Math.max(0, (vh - sh) / 2).toFixed(0) + 'px';
+        }, run: function (y) {
+          var g = 1 - Math.pow(1 - clamp((y - (this.top - vh)) / (vh + (this.h - sh) * .5)), 2.2);
           put(img, 'transform', 'scale(' + (from + (1 - from) * g).toFixed(4) + ')');
-          var seen = Math.min(e, lv.o);
-          put(box, 'opacity', seen.toFixed(3));
-          put(img, 'pointerEvents', seen > .5 ? 'auto' : 'none');
-          put(box, 'transform', 'translate3d(0,' + (-x * vh * .05).toFixed(1) + 'px,0) scale(' + (1 - x * .05).toFixed(4) + ')');
-          var k = ease(clamp((y - (this.top - vh * .5)) / (vh * .5)));
-          put(cap, 'opacity', Math.min(k, 1 - clamp(x * 1.8)).toFixed(3));
-          put(cap, 'transform', 'translate3d(0,' + ((1 - k) * 18 - x * 26).toFixed(1) + 'px,0)');
+          var k = ease(clamp((y - (this.top - vh * .75)) / (vh * .4)));
+          put(cap, 'opacity', k.toFixed(3));
+          put(cap, 'transform', 'translate3d(0,' + ((1 - k) * 14).toFixed(1) + 'px,0)');
         } });
       });
-      // A short run of photos held in one place, each dissolving into the next
-      document.querySelectorAll('.story').forEach(function (el) {
-        var layers = [].slice.call(el.querySelectorAll('.layer')), n = layers.length, next = el.dataset.next || 'text';
-        el.classList.add('pinned');
-        scenes.push({ el: el, run: function (y) {
-          var seg = clamp((y - this.top) / Math.max(1, this.h - vh)) * n;
-          var all = Math.min(arriving(this, y), leaving(this, y, next).o);
-          layers.forEach(function (ly, i) {
-            var inn = i ? ease(clamp((seg - i + .5) / .34)) : 1, out = i < n - 1 ? 1 - ease(clamp((seg - i - .72) / .28)) : 1;
-            var o = Math.min(inn, out) * all, s = 1.05 - .05 * clamp((seg - i + .5) / 1.2);
-            if (ly.dataset.zoom !== undefined) s += (1 - out) * .32;
-            put(ly, 'visibility', o > .002 ? 'visible' : 'hidden');
-            put(ly, 'opacity', o.toFixed(3));
-            put(ly.firstElementChild, 'pointerEvents', o > .5 ? 'auto' : 'none');
-            put(ly, 'transform', 'scale(' + s.toFixed(4) + ')');
+      // Progress through a held set, resting a moment on each photo
+      function setProgress(sc, y, stageTop, stageH, n) {
+        var u = clamp((y - (sc.top - stageTop)) / Math.max(1, sc.h - stageH));
+        return Math.max(0, Math.min(n - 1, u * (n - 1 + .5) - .25));
+      }
+      // Ribbon: photos side by side; the one in the middle comes forward, its neighbours wait at the edges
+      document.querySelectorAll('.story.ribbon').forEach(function (el) {
+        var stage = el.querySelector('.story-stage'), layers = [].slice.call(el.querySelectorAll('.layer')), n = layers.length, GAP = 16, w = 0, h = 0, top = 0;
+        el.classList.add('on');
+        scenes.push({ el: el, size: function () {
+          w = Math.min(innerWidth * .8, (vh - 40) * 2 / 3); h = w * 1.5; top = Math.max(0, (vh - h) / 2);
+          stage.style.height = h.toFixed(0) + 'px'; stage.style.top = top.toFixed(0) + 'px';
+          layers.forEach(function (ly) { ly.style.width = w.toFixed(0) + 'px'; ly.style.height = h.toFixed(0) + 'px'; });
+        }, run: function (y) {
+          var q = setProgress(this, y, top, h, n), i = Math.floor(q), p = i + ease(q - i), step = w * .92 + GAP;
+          layers.forEach(function (ly, k) {
+            var d = Math.min(1, Math.abs(k - p)), x = innerWidth / 2 - w / 2 + (k - p) * step;
+            put(ly, 'transform', 'translate3d(' + x.toFixed(1) + 'px,0,0) scale(' + (1 - d * .16).toFixed(4) + ')');
+            put(ly, 'opacity', (1 - d * .55).toFixed(3));
+          });
+        } });
+      });
+      // Moving edge: a thin line of the page passes up the screen. The photo above it leaves, the next is uncovered below it
+      document.querySelectorAll('.story.wipe').forEach(function (el) {
+        var stage = el.querySelector('.story-stage'), layers = [].slice.call(el.querySelectorAll('.layer')), n = layers.length, GAP = 16, h = 0, top = 0;
+        el.classList.add('on');
+        scenes.push({ el: el, size: function () {
+          h = Math.min(innerWidth * 1.5, vh - 32); top = Math.max(0, (vh - h) / 2);
+          stage.style.height = h.toFixed(0) + 'px'; stage.style.top = top.toFixed(0) + 'px';
+          layers.forEach(function (ly) { ly.style.width = '100%'; ly.style.height = h.toFixed(0) + 'px'; });
+        }, run: function (y) {
+          var q = setProgress(this, y, top, h, n);
+          function line(k) { return k < 0 ? -GAP : k >= n - 1 ? h + GAP : h * (1 - ease(clamp(q - k))); }
+          layers.forEach(function (ly, k) {
+            var t = k ? line(k - 1) + GAP / 2 : 0, b = k < n - 1 ? line(k) - GAP / 2 : h, shown = b - t > .5;
+            put(ly, 'visibility', shown ? 'visible' : 'hidden');
+            put(ly, 'clipPath', 'inset(' + Math.max(0, t).toFixed(1) + 'px 0 ' + Math.max(0, h - b).toFixed(1) + 'px 0)');
+            var come = k ? clamp(q - k + 1) : 1, img = ly.firstElementChild;
+            put(img, 'transform', 'translate3d(0,' + ((1 - ease(come)) * 26).toFixed(1) + 'px,0) scale(' + (1.05 - .05 * ease(come)).toFixed(4) + ')');
           });
         } });
       });
@@ -949,7 +943,7 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     var tl = $('tl'), fill = $('railFill'), evs = [].slice.call(tl.querySelectorAll('.ev'));
     if (still) { fill.style.transform = 'none'; evs.forEach(function (e) { e.classList.add('cur'); }); return; }
     var tops = [], last = -2;
-    scenes.push({ el: tl, size: function () { tops = evs.map(function (ev) { return pageTop(ev) + 30; }); }, run: function (y) {
+    scenes.push({ el: tl, after: function () { tops = evs.map(function (ev) { return pageTop(ev) + 30; }); }, run: function (y) {
       var line = y + vh * .58;
       fill.style.transform = 'scaleY(' + clamp((line - this.top - 18) / (this.h - 44)).toFixed(4) + ')';
       var c = -1;
@@ -1129,13 +1123,6 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
   photos.forEach(function (im, i) {
     var hit = im.closest('.foot-photo') || im;
     hit.addEventListener('click', function () { openViewer(i, null); });
-  });
-  document.querySelectorAll('.story .more').forEach(function (b) {
-    b.addEventListener('click', function () {
-      var best = null, bestO = -1;
-      b.parentNode.querySelectorAll('.layer').forEach(function (ly) { var o = parseFloat(ly.style.opacity || 1); if (o > bestO) { bestO = o; best = ly; } });
-      openViewer(photos.indexOf(best.querySelector('img')), b);
-    });
   });
   $('vClose').addEventListener('click', closeViewer);
   $('vPrev').addEventListener('click', function () { stepViewer(-1); });
