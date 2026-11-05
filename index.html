@@ -216,8 +216,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .story.wipe.on .layer img { position: absolute; left: 0; }
 .story.wipe.on .layer + .layer::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 16px; z-index: 1; background: var(--ground); }
 
-/* Touch screens: the page simply scrolls. Nothing pauses and nothing follows the finger, so nothing can jump.
-   Photo sets are swiped sideways by the guest, and each photo rests whole in the middle. */
+/* Touch screens: single photos scroll with the page; the map and photo sets hold and follow the finger */
 /* Heights are fixed once, so a browser bar showing or hiding can never change the length of the page */
 .touch .hero { min-height: var(--stable); }
 .touch .frame { max-height: calc(var(--stable) - 190px); }
@@ -226,16 +225,10 @@ button { -webkit-tap-highlight-color: transparent; }
 .touch .scene::after { display: none; }
 .touch .stick { position: static; }
 .touch .lede .nb { opacity: 1; }
-.touch .story-stage { display: flex; gap: 12px; overflow-x: auto; overflow-y: hidden; padding-inline: 10vw; scroll-snap-type: x mandatory; scroll-padding-inline: 10vw; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none; justify-items: initial; }
-.touch .story-stage::-webkit-scrollbar { display: none; }
-.touch .layer { flex: none; width: 80vw; scroll-snap-align: center; scroll-snap-stop: always; opacity: .45; transform: scale(.94); transition: opacity .5s ease, transform .6s var(--slow); }
-.touch .layer.cur { opacity: 1; transform: none; }
-.touch .layer img { width: 100%; height: auto; max-width: none; max-height: none; aspect-ratio: 2 / 3; object-fit: contain; }
-.touch .mapstage { position: relative; }
-.replay { position: absolute; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 5; transform: translateX(-50%); padding: 3px 16px; border: 1px solid var(--hair); background: rgba(31, 34, 20, .92); font: 400 .76rem/1.9 var(--ui); cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .8s ease; }
-.replay.on { opacity: 1; pointer-events: auto; }
+.touch .story.on::after { height: calc(var(--pin, 100) * 1.7 * var(--stable) / 100); }
+.touch .mapscene.on::after { height: calc(var(--stable) * 3.2); }
 
-/* Touch screens, motion: everything plays once on its own clock as it comes into view, and never follows the scroll */
+/* Touch screens, single photos and cards: play once on their own clock as they come into view */
 .anim .frame { overflow: hidden; clip-path: inset(50% 0 50% 0); transition: clip-path 1.5s var(--slow); }
 .anim .frame.in { clip-path: inset(0 0 0 0); }
 .anim .frame img.ph { transform: scale(1.1); transition: opacity .9s ease, transform 2.4s var(--slow); }
@@ -253,10 +246,6 @@ button { -webkit-tap-highlight-color: transparent; }
 .anim .rail-fill { transition: transform 1.4s var(--slow); }
 .anim .foot-photo img.ph { transform: scale(1.14); transition: opacity .9s ease, transform 8s cubic-bezier(.2, .6, .3, 1); }
 .anim footer.in .foot-photo img.ph { transform: none; }
-.touch .story.wipe .story-stage { display: block; position: relative; overflow: hidden; padding: 0; height: var(--edge-h, 150vw); }
-.touch .story.wipe .layer { position: absolute; left: 0; top: 0; width: 100%; opacity: 1; overflow: hidden; background: var(--ground); transform: none; scroll-snap-align: none; transition: transform 1.8s cubic-bezier(.65, 0, .25, 1); }
-.touch .story.wipe .layer img { position: absolute; left: 0; width: 100%; height: var(--edge-h, 150vw); aspect-ratio: auto; transition: opacity .9s ease, transform 1.8s cubic-bezier(.65, 0, .25, 1); }
-.touch .story.wipe .layer + .layer::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 16px; z-index: 1; background: var(--ground); }
 
 /* Gift guide */
 .gift { padding: 28px 24px 12px; display: grid; gap: 12px; justify-items: center; text-align: center; }
@@ -552,7 +541,6 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
       <div class="nav-road" id="navRoad">មហាវិថីព្រះមុនីវង្ស</div>
       <div class="nav-dist" id="navDist"></div>
     </div>
-    <button class="replay" id="replay" type="button">ចាក់ម្តងទៀត</button>
     <span class="credit" lang="en">© OpenStreetMap contributors</span>
   </div>
   </section>
@@ -941,56 +929,6 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
       if (IO) new IntersectionObserver(function (es, io) { if (es[0].isIntersecting) { $('end').classList.add('in'); io.disconnect(); } }, { threshold: .3 }).observe($('end'));
       else $('end').classList.add('in');
     }
-    // Photo ribbons: swipe by hand, or watch them move along by themselves until touched
-    document.querySelectorAll('.story.ribbon .story-stage').forEach(function (stage) {
-      var layers = [].slice.call(stage.querySelectorAll('.layer')), at = 0, timer = 0, touched = false;
-      layers[0].classList.add('cur');
-      if (!IO) { layers.forEach(function (ly) { ly.classList.add('cur'); }); return; }
-      var side = new IntersectionObserver(function (es) {
-        es.forEach(function (e) { e.target.classList.toggle('cur', e.isIntersecting); if (e.isIntersecting) at = layers.indexOf(e.target); });
-      }, { root: stage, threshold: .6 });
-      layers.forEach(function (ly) { side.observe(ly); });
-      if (!anim) return;
-      function stop() { touched = true; clearInterval(timer); timer = 0; }
-      stage.addEventListener('touchstart', stop, { passive: true });
-      stage.addEventListener('pointerdown', stop, { passive: true });
-      new IntersectionObserver(function (es) {
-        if (touched) return;
-        if (es[0].isIntersecting && !timer) timer = setInterval(function () {
-          var ly = layers[(at + 1) % layers.length];
-          stage.scrollTo({ left: ly.offsetLeft - (stage.clientWidth - ly.offsetWidth) / 2, behavior: 'smooth' });
-        }, 3000);
-        else if (!es[0].isIntersecting) { clearInterval(timer); timer = 0; }
-      }, { threshold: .6 }).observe(stage);
-    });
-    // Moving edge: a thin line of the page passes up over the photo by itself, uncovering the next, which stays still
-    document.querySelectorAll('.story.wipe .story-stage').forEach(function (stage) {
-      var layers = [].slice.call(stage.querySelectorAll('.layer')), GAP = 16, h = 0, at = 0, way = 1, timer = 0;
-      function paint() {
-        layers.forEach(function (ly, k) {
-          if (!k) return;
-          var on = k <= at, im = ly.firstElementChild;
-          ly.style.transform = 'translate3d(0,' + (on ? -GAP : h) + 'px,0)';
-          im.style.transform = on ? 'none' : 'translate3d(0,' + (-h - GAP) + 'px,0)';
-        });
-      }
-      scenes.push({ el: stage, size: function () {
-        var next = Math.round(Math.min(document.documentElement.clientWidth * 1.5, vh - 32));
-        if (next === h) return;
-        h = next;
-        stage.style.setProperty('--edge-h', h + 'px');
-        layers.forEach(function (ly, k) { ly.style.height = (k ? h + GAP : h) + 'px'; ly.firstElementChild.style.top = (k ? GAP : 0) + 'px'; });
-        paint();
-      } });
-      if (!anim) { return; }
-      if (IO) new IntersectionObserver(function (es) {
-        if (es[0].isIntersecting && !timer) timer = setInterval(function () {
-          if (at + way < 0 || at + way >= layers.length) way = -way;
-          at += way; paint();
-        }, 3400);
-        else if (!es[0].isIntersecting) { clearInterval(timer); timer = 0; }
-      }, { threshold: .5 }).observe(stage);
-    });
   }
   function startPage() {
     if (started) return;
@@ -1007,6 +945,24 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
         scrub(sc, cap, [{ opacity: 0, transform: 'translate3d(0,14px,0)', offset: 0 }, { opacity: 0, transform: 'translate3d(0,14px,0)', offset: .3 }, { opacity: 1, transform: 'none', offset: .85 }, { opacity: 1, transform: 'none', offset: 1 }]);
         scenes.push(sc);
       });
+      // The closing photo eases back to its full frame
+      var endSc = { el: $('end'), range: 'entry' };
+      scrub(endSc, $('end').querySelector('.foot-photo img'), [{ transform: 'scale(1.14)' }, { transform: 'scale(1)' }]);
+      scenes.push(endSc);
+      // Words of the letter light up one by one
+      var words = [].slice.call(document.querySelectorAll('#lede .nb')), lit = 0, lede = $('lede');
+      scenes.push({ el: lede, run: function (y) {
+        var u = clamp((y - (this.top - vh)) / (this.h + vh));
+        var want = Math.round(clamp((u - .12) / .42) * words.length);
+        while (lit < want) words[lit++].classList.add('lit');
+        while (lit > want) words[--lit].classList.remove('lit');
+      } });
+    }
+    // The closing words sit low on the screen, so they answer to the photo rather than to their own position
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (es, io) {
+      if (es[0].isIntersecting) { $('end').querySelectorAll('.rv').forEach(function (el, i) { el.style.transitionDelay = (i * 260) + 'ms'; el.classList.add('in'); }); io.disconnect(); }
+    }, { threshold: .55 }).observe($('end'));
+    if (!still) {
       // A held set rests a moment on each photo; these are the points in the scroll where it rests
       function rests(n) { var u = []; for (var m = 0; m < n; m++) u.push((m + .25) / (n - .5)); return u; }
       function restFrames(n, make) {
@@ -1058,23 +1014,7 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
           });
         } });
       });
-      // The closing photo eases back to its full frame
-      var endSc = { el: $('end'), range: 'entry' };
-      scrub(endSc, $('end').querySelector('.foot-photo img'), [{ transform: 'scale(1.14)' }, { transform: 'scale(1)' }]);
-      scenes.push(endSc);
-      // Words of the letter light up one by one
-      var words = [].slice.call(document.querySelectorAll('#lede .nb')), lit = 0, lede = $('lede');
-      scenes.push({ el: lede, run: function (y) {
-        var u = clamp((y - (this.top - vh)) / (this.h + vh));
-        var want = Math.round(clamp((u - .12) / .42) * words.length);
-        while (lit < want) words[lit++].classList.add('lit');
-        while (lit > want) words[--lit].classList.remove('lit');
-      } });
     }
-    // The closing words sit low on the screen, so they answer to the photo rather than to their own position
-    if ('IntersectionObserver' in window) new IntersectionObserver(function (es, io) {
-      if (es[0].isIntersecting) { $('end').querySelectorAll('.rv').forEach(function (el, i) { el.style.transitionDelay = (i * 260) + 'ms'; el.classList.add('in'); }); io.disconnect(); }
-    }, { threshold: .55 }).observe($('end'));
     startTimeline();
     startMap();
     startDock();
@@ -1149,11 +1089,8 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     }
     cam.style.transform = frames[0].transform;
     var scene = { el: host, range: 'contain' }, E = 'ease-in-out';
-    var timed = [], JOURNEY = 12000;
-    var add = still ? function (el, f) { el.animate(f, { duration: 1, fill: 'both' }).finish(); }
-      : TOUCH ? function (el, f) { var a = el.animate(f, { duration: JOURNEY, fill: 'both' }); a.pause(); timed.push(a); }
-      : function (el, f) { scrub(scene, el, f); };
-    if (!still && !TOUCH) host.classList.add('on');
+    var add = still ? function (el, f) { el.animate(f, { duration: 1, fill: 'both' }).finish(); } : function (el, f) { scrub(scene, el, f); };
+    if (!still) host.classList.add('on');
     add(cam, frames);
     add(tilt, [{ transform: 'rotateX(0deg)', offset: 0, easing: E }, { transform: 'rotateX(34deg)', offset: INTRO / TOTAL }, { transform: 'rotateX(34deg)', offset: (INTRO + RIDE) / TOTAL, easing: E }, { transform: 'rotateX(24deg)', offset: 1 }]);
     add(me, [{ opacity: 0, offset: 0 }, { opacity: 0, offset: (INTRO - .9) / TOTAL }, { opacity: 1, offset: INTRO / TOTAL }, { opacity: 1, offset: 1 }]);
@@ -1182,26 +1119,6 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
       if (navDist.textContent !== txt) navDist.textContent = txt;
     }
     if (still) { nav(TOTAL); return; }
-    if (TOUCH) {
-      var replay = $('replay'), watch = 0;
-      function play() {
-        timed.forEach(function (a) { a.play(); });
-        clearInterval(watch);
-        watch = setInterval(function () {
-          var at = timed[0].currentTime / JOURNEY;
-          nav(at * TOTAL);
-          if (at >= 1) { clearInterval(watch); replay.classList.add('on'); }
-        }, 250);
-      }
-      function hold() { clearInterval(watch); timed.forEach(function (a) { a.pause(); }); }
-      nav(0);
-      if ('IntersectionObserver' in window) new IntersectionObserver(function (es) {
-        if (es[0].isIntersecting) { if (timed[0].currentTime < JOURNEY) (img.decode ? img.decode().catch(function () {}) : Promise.resolve()).then(play); } else hold();
-      }, { threshold: .6 }).observe(stage);
-      else { timed.forEach(function (a) { a.finish(); }); nav(TOTAL); }
-      replay.addEventListener('click', function () { replay.classList.remove('on'); navState = ''; timed.forEach(function (a) { a.currentTime = 0; }); play(); });
-      return;
-    }
     scene.run = function (y) { nav(progress(this, y) * TOTAL); };
     nav(0);
     scenes.push(scene);
