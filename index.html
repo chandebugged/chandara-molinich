@@ -247,6 +247,10 @@ button { -webkit-tap-highlight-color: transparent; }
 .anim .foot-photo img.ph { transform: scale(1.14); transition: opacity .9s ease, transform 8s cubic-bezier(.2, .6, .3, 1); }
 .anim footer.in .foot-photo img.ph { transform: none; }
 
+/* Contact */
+.contact { display: grid; gap: 8px; justify-items: center; margin-top: 18px; }
+.contact a { display: inline-block; width: 210px; text-align: center; padding: 5px 12px; border: 1px solid var(--hair); text-decoration: none; font: 500 1.02rem/1.8 var(--lat); font-variant-numeric: lining-nums; letter-spacing: .06em; color: var(--ink); white-space: nowrap; }
+
 /* Gift guide */
 .gift { padding: 28px 24px 12px; display: grid; gap: 12px; justify-items: center; text-align: center; }
 .gift p { font-size: .88rem; color: var(--dim); text-wrap: balance; }
@@ -563,6 +567,11 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     <div class="qr rv"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" class="segno"><path class="qrline" stroke="#3f4422" d="M0 0.5h7m1 0h1m1 0h3m1 0h1m1 0h5m1 0h7m-29 1h1m5 0h1m1 0h2m1 0h4m2 0h2m3 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m3 0h2m1 0h1m3 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m1 0h2m1 0h1m3 0h2m3 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m3 0h1m4 0h2m2 0h1m2 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m4 0h2m1 0h1m2 0h3m2 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-21 1h1m6 0h5m-20 1h1m1 0h2m1 0h3m2 0h3m1 0h1m3 0h1m3 0h1m2 0h1m1 0h2m-28 1h1m1 0h1m3 0h1m1 0h3m3 0h5m1 0h2m1 0h1m3 0h1m-29 1h1m2 0h2m1 0h1m1 0h2m3 0h1m2 0h1m1 0h1m2 0h2m1 0h1m1 0h2m-27 1h2m2 0h1m2 0h2m1 0h3m6 0h1m7 0h1m-29 1h2m4 0h1m1 0h2m1 0h1m1 0h1m1 0h2m2 0h1m3 0h1m1 0h2m-27 1h1m2 0h2m2 0h2m6 0h5m2 0h1m3 0h3m-29 1h1m3 0h1m1 0h2m2 0h3m3 0h2m1 0h2m1 0h1m3 0h3m-27 1h1m1 0h1m4 0h2m3 0h3m1 0h3m3 0h1m2 0h1m-28 1h2m1 0h2m1 0h2m1 0h1m1 0h4m1 0h1m2 0h3m2 0h2m1 0h1m-27 1h1m2 0h2m1 0h2m1 0h3m1 0h2m2 0h1m1 0h2m1 0h1m1 0h3m-28 1h1m2 0h1m2 0h1m1 0h5m2 0h4m1 0h2m1 0h2m1 0h1m-20 1h2m1 0h1m6 0h1m1 0h1m3 0h1m2 0h1m-26 1h2m1 0h1m1 0h4m1 0h1m1 0h1m4 0h9m-19 1h1m2 0h2m4 0h2m1 0h1m3 0h5m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h2m1 0h2m1 0h1m1 0h2m1 0h1m-28 1h1m5 0h1m1 0h2m1 0h1m1 0h1m1 0h1m4 0h1m3 0h2m1 0h2m-29 1h1m1 0h3m1 0h1m2 0h1m2 0h1m7 0h5m1 0h3m-29 1h1m1 0h3m1 0h1m1 0h1m4 0h6m2 0h1m1 0h3m2 0h1m-29 1h1m1 0h3m1 0h1m1 0h3m3 0h1m1 0h2m2 0h2m1 0h1m2 0h1m1 0h1m-29 1h1m5 0h1m3 0h1m1 0h2m6 0h2m1 0h3m1 0h1m-28 1h7m1 0h1m3 0h3m2 0h2m1 0h1m3 0h1m2 0h1"/></svg></div>
     <span class="scan rv">សូមស្កេនទីនេះដើម្បីស្វែងរកទីតាំង</span>
     <a class="btn rv" href="https://maps.app.goo.gl/NR2HSBo1tuWhs7f39" target="_blank" rel="noopener">បើកផែនទី</a>
+    <div class="contact" lang="en">
+      <p class="label rv">Contact</p>
+      <a class="rv" href="tel:+85590877969">+855 90 877 969</a>
+      <a class="rv" href="tel:+85516301122">+855 16 301 122</a>
+    </div>
   </section>
 
   <section class="story ribbon" style="--pin:130" aria-label="រូបថតក្នុងក្រុង">
@@ -587,10 +596,10 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
 
   <section class="story ribbon" data-from="left" style="--pin:195" aria-label="រូបថតលេងសើច">
     <div class="story-stage">
-      <div class="layer"><img class="ph" loading="lazy" src="ph-cream-head.jpg" alt="កូនកំលោះដាក់ដៃលើក្បាលកូនក្រមុំ" decoding="async"></div>
-      <div class="layer"><img class="ph" loading="lazy" src="ph-cream-pose.jpg" alt="កូនកំលោះ និងកូនក្រមុំញញឹម ដាក់ដៃទ្រចង្កា" decoding="async"></div>
       <div class="layer"><img class="ph" loading="lazy" src="ph-bed.jpg" alt="កូនកំលោះ និងកូនក្រមុំអង្គុយលើគ្រែ ថតរូបជាមួយគ្នា" decoding="async"></div>
       <div class="layer"><img class="ph" loading="lazy" src="ph-jump.jpg" alt="កូនក្រមុំលោតលើគ្រែ វាយខ្នើយជាមួយកូនកំលោះ" decoding="async"></div>
+      <div class="layer"><img class="ph" loading="lazy" src="ph-cream-head.jpg" alt="កូនកំលោះដាក់ដៃលើក្បាលកូនក្រមុំ" decoding="async"></div>
+      <div class="layer"><img class="ph" loading="lazy" src="ph-cream-pose.jpg" alt="កូនកំលោះ និងកូនក្រមុំញញឹម ដាក់ដៃទ្រចង្កា" decoding="async"></div>
     </div>
   </section>
 
