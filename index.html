@@ -1315,7 +1315,8 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
 
   // ---- Countdown and calendar
   var kh = function (n) { return String(n).replace(/\d/g, function (d) { return '០១២៣៤៥៦៧៨៩'[d]; }); };
-  var days = Math.ceil((Date.UTC(2026, 10, 22, 10) - Date.now()) / 864e5);
+  // Calendar days in Phnom Penh, so the number changes at midnight there and agrees with the countdown
+  var days = Math.floor(Date.UTC(2026, 10, 22) / 864e5) - Math.floor((Date.now() + 7 * 36e5) / 864e5);
   if (days > 0) { var l = $('left'); l.textContent = 'នៅសល់ ' + kh(days) + ' ថ្ងៃទៀត'; l.hidden = false; }
   var cdEnd = Date.UTC(2026, 10, 22, 10), pad = function (n) { return kh(n < 10 ? '0' + n : n); }, cdTimer = 0;
   function cdTick() {
