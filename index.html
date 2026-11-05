@@ -37,7 +37,7 @@
   --slow: cubic-bezier(.16, .84, .24, 1);
 }
 * { box-sizing: border-box; }
-html { background: var(--ground); overflow-x: clip; }
+html { background: var(--ground); overflow-x: clip; overflow-anchor: none; }
 body { margin: 0; background: transparent; color: var(--ink); font: 300 .94rem/2.05 var(--km); -webkit-text-size-adjust: 100%; overflow-x: clip; -webkit-font-smoothing: antialiased; }
 h2, h3, p { margin: 0; font-weight: inherit; font-size: inherit; }
 img, svg { display: block; max-width: 100%; }
@@ -47,7 +47,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .nb { white-space: nowrap; }
 .defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .leafy { fill: currentColor; color: var(--sage); }
-.breath { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0; background: radial-gradient(95% 65% at 50% 42%, rgba(233, 205, 150, .2), transparent 74%); will-change: opacity; }
+.breath { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity .6s linear; background: radial-gradient(95% 65% at 50% 42%, rgba(233, 205, 150, .2), transparent 74%); will-change: opacity; }
 .petal { position: fixed; left: 0; top: 0; z-index: 15; pointer-events: none; will-change: transform; }
 .petal svg { width: 100%; height: 100%; }
 .label { font: 500 .72rem/1.6 var(--lat); letter-spacing: .34em; text-transform: uppercase; padding-left: .34em; color: var(--accent); }
@@ -116,7 +116,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .details { position: relative; overflow-x: clip; }
 
 .hero { min-height: 100vh; min-height: 100svh; display: grid; align-content: center; justify-items: center; gap: 8px; text-align: center; padding: 40px 20px 8px; position: relative; }
-.hero-tag { position: relative; display: block; width: min(60vw, 40vh, 290px); aspect-ratio: 580 / 730; padding: 0; border: 0; background: none; cursor: pointer; margin-block: 16px; will-change: transform; }
+.hero-tag { position: relative; display: block; width: min(60vw, 40vh, 290px); aspect-ratio: 580 / 730; padding: 0; border: 0; background: none; cursor: pointer; margin-block: 16px; transition: transform .6s linear; }
 .hero-tag .tag-olive { visibility: hidden; }
 .js .hero-tag.wait { visibility: hidden; }
 .hero-guest { display: grid; gap: 0; }
@@ -129,14 +129,13 @@ button { -webkit-tap-highlight-color: transparent; }
 /* Photo scenes: one thing at a time, in order, with the same small gap between them. A photo pauses in the
    middle of the screen while it settles, then moves on with what follows directly beneath it. */
 :root { --gap: 16px; }
-.scene, .story, .mapstage, footer { margin-top: var(--gap); }
+.scene, .story, .mapscene, .gift, footer { margin-top: var(--gap); }
 .scene { position: relative; }
 .scene::after { content: ""; display: block; height: calc(var(--pin, 0) * 1vh); height: calc(var(--pin, 0) * 1svh); }
 .stick { position: sticky; top: 0; display: grid; }
 .frame { position: relative; aspect-ratio: 2 / 3; width: 100%; max-height: calc(100vh - 190px); max-height: calc(100svh - 190px); }
 .frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .wide .frame { aspect-ratio: 3 / 2; }
-.scene.nearby .frame img, .scene.nearby .cap, footer.nearby .foot-photo img, .story.nearby .layer, .story.nearby .layer img { will-change: transform, opacity; }
 .story-stage { display: grid; gap: var(--gap); }
 .layer img { width: 100%; height: auto; }
 @media (min-width: 820px) { .story-stage { justify-items: center; } .layer img { width: auto; max-width: 100%; max-height: calc(100vh - 32px); } }
@@ -211,6 +210,19 @@ button { -webkit-tap-highlight-color: transparent; }
 .story.on .story-stage { display: block; position: sticky; top: 0; overflow: hidden; }
 .story.on .layer { position: absolute; left: 0; top: 0; }
 .story.on .layer img { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: contain; }
+.story.wipe.on .layer { overflow: hidden; background: var(--ground); }
+.story.wipe.on .layer img { position: absolute; left: 0; }
+.story.wipe.on .layer + .layer::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 16px; z-index: 1; background: var(--ground); }
+
+/* Gift guide */
+.gift { padding: 28px 24px 12px; display: grid; gap: 12px; justify-items: center; text-align: center; }
+.gift p { font-size: .88rem; color: var(--dim); text-wrap: balance; }
+.gift .gift-text { font: 500 1.02rem/1.6 var(--lat); max-width: 34ch; }
+.gift-qr { width: min(58vw, 220px); padding: 10px; background: #fff; border-radius: 4px; margin-top: 8px; }
+.gift-qr img { width: 100%; height: auto; }
+.gift-bank { font: 500 .86rem/1.5 var(--lat); letter-spacing: .14em; color: var(--ink); }
+.gift-who { font: 500 .76rem/1.4 var(--lat); letter-spacing: .08em; color: var(--dim); }
+.gift .btn { margin-top: 4px; font-family: var(--lat); font-weight: 500; }
 
 /* Dress colours: a quiet suggestion under the suit and dress */
 .dress-cap h2 { font: 400 1rem/1.7 var(--pen); }
@@ -223,9 +235,11 @@ button { -webkit-tap-highlight-color: transparent; }
 .dress-cap::before { content: ""; position: absolute; inset: 0; z-index: -1; background-color: var(--wash, #d9ccb0); opacity: .42; transition: background-color 1.3s ease; -webkit-mask-image: linear-gradient(transparent, #000 62%); mask-image: linear-gradient(transparent, #000 62%); }
 
 /* Map: an illustrated city, moved only by the compositor */
-.mapstage { position: relative; height: 100vh; height: 100svh; overflow: hidden; background: #23271a; perspective: 1200px; perspective-origin: 50% 36%; contain: paint; }
-.tilt { position: absolute; inset: 0; transform-origin: 50% 56%; transform-style: preserve-3d; will-change: transform; }
-.cam { position: absolute; left: 50%; top: 56%; width: 0; height: 0; transform-origin: 0 0; will-change: transform; }
+.mapscene { position: relative; }
+.mapscene.on::after { content: ""; display: block; height: 220vh; height: 220svh; }
+.mapstage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: #23271a; perspective: 1200px; perspective-origin: 50% 36%; contain: paint; }
+.tilt { position: absolute; inset: 0; transform-origin: 50% 56%; transform-style: preserve-3d; }
+.cam { position: absolute; left: 50%; top: 56%; width: 0; height: 0; transform-origin: 0 0; }
 .cam img { position: absolute; left: 0; top: 0; max-width: none; }
 .cam i { position: absolute; width: 7px; height: 7px; margin: -3.5px; border-radius: 50%; background: var(--gold); opacity: 0; }
 .me { position: absolute; left: 50%; top: 56%; width: 16px; height: 16px; margin: -8px; border-radius: 50%; background: var(--gold); border: 2px solid var(--dark); box-shadow: 0 0 0 1px var(--gold); opacity: 0; z-index: 3; }
@@ -233,15 +247,13 @@ button { -webkit-tap-highlight-color: transparent; }
 @keyframes ping { from { transform: scale(.4); opacity: .8; } to { transform: scale(1.5); opacity: 0; } }
 .fog { position: absolute; left: 0; right: 0; top: 0; height: 30%; background: linear-gradient(var(--ground) 12%, rgba(31, 34, 20, 0)); z-index: 2; pointer-events: none; }
 .fog.b { top: auto; bottom: 0; height: 14%; background: linear-gradient(rgba(31, 34, 20, 0), var(--ground)); }
-.arrive { position: absolute; left: 50%; bottom: 44%; width: 44px; margin-left: -22px; z-index: 4; transform-origin: 50% 100%; opacity: 0; filter: drop-shadow(0 4px 5px rgba(0, 0, 0, .5)); }
+.arrive { position: absolute; left: 50%; bottom: 44%; width: 44px; margin-left: -22px; z-index: 4; transform-origin: 50% 100%; opacity: 0; }
 .arrive svg { width: 100%; height: auto; }
 .nav-card { position: absolute; left: 14px; right: 14px; top: calc(14px + env(safe-area-inset-top, 0px)); z-index: 5; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 6px 14px 6px 8px; background: rgba(31, 34, 20, .92); border: 1px solid var(--hair); color: var(--ink); font-family: var(--ui); }
 .nav-ic { width: 30px; height: 30px; display: grid; place-items: center; color: var(--gold); }
 .nav-ic svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
 .nav-road { font-size: .82rem; line-height: 1.5; min-width: 0; text-wrap: balance; }
 .nav-dist { font-size: .8rem; line-height: 1.5; color: var(--gold); white-space: nowrap; }
-.replay { position: absolute; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 5; transform: translateX(-50%); padding: 3px 16px; border: 1px solid var(--hair); background: rgba(31, 34, 20, .92); font: 400 .76rem/1.9 var(--ui); cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .8s ease; }
-.replay.on { opacity: 1; pointer-events: auto; }
 .credit { position: absolute; right: 8px; bottom: 4px; z-index: 5; font: 500 9px/1.4 var(--lat); color: var(--dim); }
 .place { padding-block: 24px 8px; display: grid; gap: 12px; justify-items: center; text-align: center; }
 .place h2 { font: 400 clamp(1.25rem, 5vw, 1.6rem)/1.7 var(--pen); }
@@ -485,7 +497,8 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     </div>
   </section>
 
-  <section class="mapstage" id="sec-map">
+  <section class="mapscene" id="sec-map">
+  <div class="mapstage">
     <div class="tilt" id="tilt"><div class="cam" id="cam"><img id="mapImg" alt="" width="1470" height="2873" decoding="async"></div></div>
     <div class="fog"></div><div class="fog b"></div>
     <div class="me" id="me"></div>
@@ -495,8 +508,8 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
       <div class="nav-road" id="navRoad">មហាវិថីព្រះមុនីវង្ស</div>
       <div class="nav-dist" id="navDist"></div>
     </div>
-    <button class="replay" id="replay" type="button">ចាក់ម្តងទៀត</button>
     <span class="credit" lang="en">© OpenStreetMap contributors</span>
+  </div>
   </section>
 
   <section class="col place">
@@ -514,6 +527,17 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
       <div class="layer"><img class="ph" src="ph-flowers.jpg" alt="កូនកំលោះថតរូបកូនក្រមុំកាន់ភួងផ្កា" decoding="async"></div>
       <div class="layer"><img class="ph" src="ph-grass.jpg" alt="កូនកំលោះ និងកូនក្រមុំអង្គុយលើស្មៅ" decoding="async"></div>
     </div>
+  </section>
+
+  <section class="col gift" id="gift">
+    <div class="crest rv" data-crest aria-hidden="true"><div class="crest-mono" data-mono></div><div class="crest-leaves" data-leaves></div></div>
+    <p class="label rv" lang="en">Gift Guide</p>
+    <p class="gift-text rv" lang="en">Your presence on our special day is the greatest gift of all.</p>
+    <p class="gift-text rv" lang="en">If you are unable to make it to the event, you can still help us celebrate with a gift through the QR code below.</p>
+    <div class="gift-qr rv"><img src="gift-qr.png" alt="KHQR សម្រាប់ផ្ញើប្រាក់តាម ABA" width="570" height="572" decoding="async"></div>
+    <p class="gift-bank rv" lang="en">ABA KHQR</p>
+    <p class="gift-who rv" lang="en">SOK M. &amp; NGUONSAO C.</p>
+    <a class="btn rv" href="gift-qr.png" download="chandara-molinich-khqr.png" lang="en">Save QR code</a>
   </section>
 
   <section class="story wipe" style="--pin:150" aria-label="រូបថតសខ្មៅ">
@@ -754,7 +778,7 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     soundBtn.classList.toggle('on', on);
     soundBtn.setAttribute('aria-label', on ? 'បិទភ្លេង' : 'បើកភ្លេង');
     soundBtn.setAttribute('aria-pressed', String(on));
-    if (on && !glowOn && !still) { glowOn = true; requestAnimationFrame(glow); }
+    if (on && !glowOn && !still) { glowOn = true; glow(); }
     if (!on) breath.style.opacity = 0;
   }
   var glowV = 0, ONSETS = [4.4,6.9,9.4,12.7,15.2,17.7,21.1,23.5,27.6,31.0,33.5,36.0,39.3,44.3,47.6,50.0,52.5,55.0,57.5,60.0,62.5,65.9,68.4,70.8,74.2,76.6,79.1,84.1,86.6,89.1,92.4,97.4,99.8,102.3,105.3,108.2,110.7,113.2,115.6,118.7,121.0,125.1,127.5,132.0,138.8,142.7,145.5,148.0,150.5,154.2,159.2,162.5,165.0,167.5,172.4,174.9,177.4,180.7,183.2,185.7,189.1,191.5,194.0,199.0,201.5,204.0,207.3,212.3,215.6,218.0,220.5,225.5,228.0,230.5,233.9,236.4,238.8,241.3,243.8,246.7,249.6,252.1,254.6,257.1,260.1], nextOn = 0, lastT = 0, petals = 0;
@@ -777,15 +801,15 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
   function glow() {
     if (bgm.paused) { glowOn = false; return; }
     var c = BREATH.charCodeAt(Math.min(BREATH.length - 1, Math.floor(bgm.currentTime))) - 48;
-    glowV += (c / 9 - glowV) * .012;
-    breath.style.opacity = glowV.toFixed(3);
+    glowV += (c / 9 - glowV) * .2;
+    breath.style.opacity = glowV.toFixed(2);
     // The tag breathes with the music, and a petal falls on each musical phrase
-    if (root.classList.contains('opened')) heroTag.style.transform = 'scale(' + (1 + glowV * .018).toFixed(4) + ')';
+    if (root.classList.contains('opened') && scrollY < innerHeight) heroTag.style.transform = 'scale(' + (1 + glowV * .018).toFixed(4) + ')';
     var now = bgm.currentTime;
     if (now < lastT - 1) nextOn = 0;
     lastT = now;
-    while (nextOn < ONSETS.length && ONSETS[nextOn] <= now) { if (ONSETS[nextOn] > now - .4) petal(); nextOn++; }
-    requestAnimationFrame(glow);
+    while (nextOn < ONSETS.length && ONSETS[nextOn] <= now) { if (ONSETS[nextOn] > now - .6) petal(); nextOn++; }
+    setTimeout(glow, 250);
   }
   function startMusic() { var p = bgm.play(); if (p && p.catch) p.catch(function () { syncSound(); }); }
   bgm.addEventListener('play', syncSound);
@@ -813,22 +837,46 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
 
   // ---- One loop drives every scene. It eases towards the scroll position, so a phone's stepped
   // scroll events still give a continuous motion. Offsets are cached, and only transform and opacity change.
-  var scenes = [], vh = innerHeight, looping = false, cur = 0, lastNow = 0;
+  var scenes = [], vh = innerHeight, looping = false, cur = 0, lastNow = 0, lastW = document.documentElement.clientWidth;
+  // A phone's address bar changes innerHeight during a scroll, so sizes come from this steady measure instead
+  var probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;left:0;top:0;width:0;height:100vh;height:100svh;visibility:hidden;pointer-events:none';
+  document.body.appendChild(probe);
+  // Where the browser can, it runs the motion itself from the scroll position, away from the page's own work
+  var SD = 'ViewTimeline' in window && !!(window.CSS && CSS.percent) && !still;
+  function scrub(sc, el, frames) {
+    var o = { fill: 'both', easing: 'linear' };
+    if (SD) {
+      o.timeline = sc.tl || (sc.tl = new ViewTimeline({ subject: sc.el, axis: 'block' }));
+      o.rangeStart = { rangeName: sc.range, offset: CSS.percent(0) };
+      o.rangeEnd = { rangeName: sc.range, offset: CSS.percent(100) };
+    } else o.duration = 1000;
+    var a = el.animate(frames, o);
+    if (!SD) a.pause();
+    (sc.anims = sc.anims || []).push(a);
+    return a;
+  }
+  function progress(sc, y) {
+    if (sc.range === 'entry') return clamp((y - (sc.top - vh)) / Math.max(1, Math.min(sc.h, vh)));
+    return clamp((y - sc.top) / Math.max(1, sc.h - vh));
+  }
   var clamp = function (v) { return Math.max(0, Math.min(1, v)); };
   var ease = function (u) { return u * u * (3 - 2 * u); };
   var started = false;
   function pageTop(el) { var t = 0; while (el) { t += el.offsetTop; el = el.offsetParent; } return t; }
   function put(el, prop, val) { var k = '_' + prop; if (el[k] !== val) { el[k] = val; el.style[prop] = val; } }
   function measure() {
-    vh = innerHeight;
+    vh = probe.offsetHeight || innerHeight;
     scenes.forEach(function (sc) { if (sc.size) sc.size(); });
     scenes.forEach(function (sc) { sc.top = pageTop(sc.el); sc.h = sc.el.offsetHeight; if (sc.after) sc.after(); });
   }
   function draw(y) {
     scenes.forEach(function (sc) {
       var near = y + vh * 1.5 > sc.top && y < sc.top + sc.h + vh * .5;
-      if (near !== sc.near) { sc.near = near; sc.el.classList.toggle('nearby', near); if (!near) sc.run(y); }
-      if (near) sc.run(y);
+      if (!near && !sc.near) return;
+      sc.near = near;
+      if (!SD && sc.anims) { var t = progress(sc, y) * 1000; sc.anims.forEach(function (a) { a.currentTime = t; }); }
+      if (sc.run) sc.run(y);
     });
     dockFrame(y);
   }
@@ -851,66 +899,67 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     if (!still) {
       // A photo settles to its full size on its way to the middle of the screen, always whole
       document.querySelectorAll('[data-scene]').forEach(function (el) {
-        var grow = el.dataset.scene === 'grow', stickEl = el.querySelector('.stick'), img = el.querySelector('.frame img'), cap = el.querySelector('.cap'), from = grow ? .9 : .95, sh = 0;
-        scenes.push({ el: el, size: function () {
-          sh = stickEl.offsetHeight;
-          stickEl.style.top = Math.max(0, (vh - sh) / 2).toFixed(0) + 'px';
-        }, run: function (y) {
-          var g = 1 - Math.pow(1 - clamp((y - (this.top - vh)) / (vh + (this.h - sh) * .5)), 2.2);
-          put(img, 'transform', 'scale(' + (from + (1 - from) * g).toFixed(4) + ')');
-          var k = ease(clamp((y - (this.top - vh * .75)) / (vh * .4)));
-          put(cap, 'opacity', k.toFixed(3));
-          put(cap, 'transform', 'translate3d(0,' + ((1 - k) * 14).toFixed(1) + 'px,0)');
-        } });
+        var grow = el.dataset.scene === 'grow', stickEl = el.querySelector('.stick'), img = el.querySelector('.frame img'), cap = el.querySelector('.cap'), from = grow ? .9 : .95;
+        var sc = { el: el, range: 'entry', size: function () { put(stickEl, 'top', Math.max(0, (vh - stickEl.offsetHeight) / 2).toFixed(0) + 'px'); } };
+        scrub(sc, img, [{ transform: 'scale(' + from + ')' }, { transform: 'scale(1)' }]);
+        scrub(sc, cap, [{ opacity: 0, transform: 'translate3d(0,14px,0)', offset: 0 }, { opacity: 0, transform: 'translate3d(0,14px,0)', offset: .3 }, { opacity: 1, transform: 'none', offset: .85 }, { opacity: 1, transform: 'none', offset: 1 }]);
+        scenes.push(sc);
       });
-      // Progress through a held set, resting a moment on each photo
-      function setProgress(sc, y, stageTop, stageH, n) {
-        var u = clamp((y - (sc.top - stageTop)) / Math.max(1, sc.h - stageH));
-        return Math.max(0, Math.min(n - 1, u * (n - 1 + .5) - .25));
+      // A held set rests a moment on each photo; these are the points in the scroll where it rests
+      function rests(n) { var u = []; for (var m = 0; m < n; m++) u.push((m + .25) / (n - .5)); return u; }
+      function restFrames(n, make) {
+        var u = rests(n), f = [Object.assign(make(0), { offset: 0 })];
+        for (var m = 0; m < n; m++) f.push(Object.assign(make(m), { offset: u[m], easing: 'cubic-bezier(.45,0,.55,1)' }));
+        f.push(Object.assign(make(n - 1), { offset: 1 }));
+        return f;
       }
+      function rebuild(sc) { (sc.anims || []).forEach(function (a) { a.cancel(); }); sc.anims = []; }
       // Ribbon: photos side by side; the one in the middle comes forward, its neighbours wait at the edges
       document.querySelectorAll('.story.ribbon').forEach(function (el) {
-        var stage = el.querySelector('.story-stage'), layers = [].slice.call(el.querySelectorAll('.layer')), n = layers.length, GAP = 16, w = 0, h = 0, top = 0, side = el.dataset.from === 'left' ? -1 : 1;
+        var stage = el.querySelector('.story-stage'), layers = [].slice.call(el.querySelectorAll('.layer')), n = layers.length, GAP = 16, side = el.dataset.from === 'left' ? -1 : 1, built = '';
         el.classList.add('on');
-        scenes.push({ el: el, size: function () {
-          w = Math.min(innerWidth * .8, (vh - 40) * 2 / 3); h = w * 1.5; top = Math.max(0, (vh - h) / 2);
-          stage.style.height = h.toFixed(0) + 'px'; stage.style.top = top.toFixed(0) + 'px';
-          layers.forEach(function (ly) { ly.style.width = w.toFixed(0) + 'px'; ly.style.height = h.toFixed(0) + 'px'; });
-        }, run: function (y) {
-          var q = setProgress(this, y, top, h, n), i = Math.floor(q), p = i + ease(q - i), step = w * .92 + GAP;
+        scenes.push({ el: el, range: 'contain', size: function () {
+          var vw = document.documentElement.clientWidth, w = Math.round(Math.min(vw * .8, (vh - 40) * 2 / 3)), h = Math.round(w * 1.5), key = vw + 'x' + vh;
+          if (key === built) return;
+          built = key;
+          stage.style.height = h + 'px'; stage.style.top = Math.max(0, Math.round((vh - h) / 2)) + 'px';
+          var step = w * .92 + GAP, sc = this;
+          rebuild(sc);
           layers.forEach(function (ly, k) {
-            var d = Math.min(1, Math.abs(k - p)), x = innerWidth / 2 - w / 2 + side * (k - p) * step;
-            put(ly, 'transform', 'translate3d(' + x.toFixed(1) + 'px,0,0) scale(' + (1 - d * .16).toFixed(4) + ')');
-            put(ly, 'opacity', (1 - d * .55).toFixed(3));
+            ly.style.width = w + 'px'; ly.style.height = h + 'px';
+            scrub(sc, ly, restFrames(n, function (m) {
+              var d = Math.min(1, Math.abs(k - m)), x = vw / 2 - w / 2 + side * (k - m) * step;
+              return { transform: 'translate3d(' + x.toFixed(1) + 'px,0,0) scale(' + (1 - d * .16).toFixed(3) + ')', opacity: 1 - d * .55 };
+            }));
           });
         } });
       });
-      // Moving edge: a thin line of the page passes up the screen. The photo above it leaves, the next is uncovered below it
+      // Moving edge: a thin line of the page passes up the screen and uncovers the next photo, which stays still as it does
       document.querySelectorAll('.story.wipe').forEach(function (el) {
-        var stage = el.querySelector('.story-stage'), layers = [].slice.call(el.querySelectorAll('.layer')), n = layers.length, GAP = 16, h = 0, top = 0;
+        var stage = el.querySelector('.story-stage'), layers = [].slice.call(el.querySelectorAll('.layer')), n = layers.length, GAP = 16, built = '';
         el.classList.add('on');
-        scenes.push({ el: el, size: function () {
-          h = Math.min(innerWidth * 1.5, vh - 32); top = Math.max(0, (vh - h) / 2);
-          stage.style.height = h.toFixed(0) + 'px'; stage.style.top = top.toFixed(0) + 'px';
-          layers.forEach(function (ly) { ly.style.width = '100%'; ly.style.height = h.toFixed(0) + 'px'; });
-        }, run: function (y) {
-          var q = setProgress(this, y, top, h, n);
-          function line(k) { return k < 0 ? -GAP : k >= n - 1 ? h + GAP : h * (1 - ease(clamp(q - k))); }
+        scenes.push({ el: el, range: 'contain', size: function () {
+          var vw = document.documentElement.clientWidth, h = Math.round(Math.min(vw * 1.5, vh - 32)), key = vw + 'x' + vh;
+          if (key === built) return;
+          built = key;
+          stage.style.height = h + 'px'; stage.style.top = Math.max(0, Math.round((vh - h) / 2)) + 'px';
+          var sc = this, u = rests(n);
+          rebuild(sc);
           layers.forEach(function (ly, k) {
-            var t = k ? line(k - 1) + GAP / 2 : 0, b = k < n - 1 ? line(k) - GAP / 2 : h, shown = b - t > .5;
-            put(ly, 'visibility', shown ? 'visible' : 'hidden');
-            put(ly, 'clipPath', 'inset(' + Math.max(0, t).toFixed(1) + 'px 0 ' + Math.max(0, h - b).toFixed(1) + 'px 0)');
-            var come = k ? clamp(q - k + 1) : 1, img = ly.firstElementChild;
-            put(img, 'transform', 'translate3d(0,' + ((1 - ease(come)) * 26).toFixed(1) + 'px,0) scale(' + (1.05 - .05 * ease(come)).toFixed(4) + ')');
+            var im = ly.firstElementChild;
+            ly.style.width = '100%'; ly.style.height = (k ? h + GAP : h) + 'px';
+            im.style.height = h + 'px'; im.style.top = (k ? GAP : 0) + 'px';
+            if (!k) return;
+            var E = 'cubic-bezier(.45,0,.55,1)';
+            scrub(sc, ly, [{ transform: 'translate3d(0,' + h + 'px,0)', offset: 0 }, { transform: 'translate3d(0,' + h + 'px,0)', offset: u[k - 1], easing: E }, { transform: 'translate3d(0,' + (-GAP) + 'px,0)', offset: u[k] }, { transform: 'translate3d(0,' + (-GAP) + 'px,0)', offset: 1 }]);
+            scrub(sc, im, [{ transform: 'translate3d(0,' + (-h - GAP) + 'px,0)', offset: 0 }, { transform: 'translate3d(0,' + (-h - GAP) + 'px,0)', offset: u[k - 1], easing: E }, { transform: 'none', offset: u[k] }, { transform: 'none', offset: 1 }]);
           });
         } });
       });
       // The closing photo eases back to its full frame
-      var end = $('end'), endImg = end.querySelector('.foot-photo img');
-      scenes.push({ el: end, run: function (y) {
-        var u = clamp((y - (this.top - vh)) / Math.max(1, this.h));
-        put(endImg, 'transform', 'scale(' + (1.14 - .14 * ease(u)).toFixed(4) + ')');
-      } });
+      var endSc = { el: $('end'), range: 'entry' };
+      scrub(endSc, $('end').querySelector('.foot-photo img'), [{ transform: 'scale(1.14)' }, { transform: 'scale(1)' }]);
+      scenes.push(endSc);
       // Words of the letter light up one by one
       var words = [].slice.call(document.querySelectorAll('#lede .nb')), lit = 0, lede = $('lede');
       scenes.push({ el: lede, run: function (y) {
@@ -929,7 +978,12 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     startDock();
     cur = scrollY; measure(); draw(cur);
     addEventListener('scroll', ask, { passive: true });
-    addEventListener('resize', function () { measure(); ask(); }, { passive: true });
+    // Only a real change of width (turning the phone) resizes anything; the address bar coming and going does not
+    addEventListener('resize', function () {
+      var w = document.documentElement.clientWidth;
+      if (w === lastW) return;
+      lastW = w; measure(); ask();
+    }, { passive: true });
     addEventListener('load', function () { measure(); ask(); });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { measure(); ask(); });
     if (window.ResizeObserver) new ResizeObserver(function () { measure(); ask(); }).observe(details);
@@ -951,9 +1005,9 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     } });
   }
 
-  // ---- Map: time-based so the browser's compositor runs it; only transform and opacity move.
+  // ---- Map: the journey follows the scroll while the map stays in place, so the two can never fight each other
   function startMap() {
-    var stage = $('sec-map'), cam = $('cam'), tilt = $('tilt'), me = $('me'), arrive = $('arrive'), replay = $('replay'), img = $('mapImg');
+    var host = $('sec-map'), stage = host.querySelector('.mapstage'), cam = $('cam'), tilt = $('tilt'), me = $('me'), pin = $('arrive'), img = $('mapImg');
     var D = JSON.parse($('routeData').textContent), R = D.route, pts = [], cum = [0];
     img.src = 'map-art.webp';
     for (var i = 0; i < R.length; i += 2) { pts.push([R[i], R[i + 1]]); if (i) cum.push(cum[cum.length - 1] + Math.hypot(R[i] - R[i - 2], R[i + 1] - R[i - 1])); }
@@ -965,38 +1019,40 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
       var u = (s - cum[lo]) / (cum[hi] - cum[lo] || 1);
       return [pts[lo][0] + (pts[hi][0] - pts[lo][0]) * u, pts[lo][1] + (pts[hi][1] - pts[lo][1]) * u];
     }
-    var INTRO = 3, RIDE = 10.5, LAND = 2.6, TOTAL = INTRO + RIDE + LAND;
+    var INTRO = 2.2, RIDE = 11, LAND = 2.2, TOTAL = INTRO + RIDE + LAND;
     var sm = function (u) { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
     var travel = function (u) { u = Math.max(0, Math.min(1, u)); return u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; };
     var sAt = function (t) { return travel((t - INTRO) / RIDE) * LEN; };
     var mid = at(LEN * .46), over = Math.min(.42, stage.clientHeight / (D.H * .86));
     var frames = [];
-    for (var n = 0; n <= 120; n++) {
-      var t = n / 120 * TOTAL, p = at(sAt(t)), k = sm((t - .5) / (INTRO - .5)), z = sm((t - INTRO - RIDE) / LAND);
-            var x = mid[0] + (p[0] - mid[0]) * k, y = mid[1] + (p[1] - mid[1]) * k, sc = (over + (1 - over) * k) * (1 + .3 * z);
-      frames.push({ transform: 'scale(' + sc.toFixed(4) + ') translate3d(' + (-x).toFixed(1) + 'px,' + (-y).toFixed(1) + 'px,0)', offset: n / 120 });
+    for (var n = 0; n <= 90; n++) {
+      var t = n / 90 * TOTAL, p = at(sAt(t)), k = sm((t - .4) / (INTRO - .4)), z = sm((t - INTRO - RIDE) / LAND);
+      var x = mid[0] + (p[0] - mid[0]) * k, y = mid[1] + (p[1] - mid[1]) * k, sc = (over + (1 - over) * k) * (1 + .3 * z);
+      frames.push({ transform: 'scale(' + sc.toFixed(4) + ') translate3d(' + (-x).toFixed(1) + 'px,' + (-y).toFixed(1) + 'px,0)', offset: n / 90 });
     }
     cam.style.transform = frames[0].transform;
-    var ms = TOTAL * 1000, anims = [];
-    anims.push(cam.animate(frames, { duration: ms, fill: 'both', easing: 'linear' }));
-    anims.push(tilt.animate([{ transform: 'rotateX(0deg)' }, { transform: 'rotateX(34deg)', offset: INTRO / TOTAL }, { transform: 'rotateX(34deg)', offset: (INTRO + RIDE) / TOTAL }, { transform: 'rotateX(24deg)' }], { duration: ms, fill: 'both', easing: 'ease-in-out' }));
-    anims.push(me.animate([{ opacity: 0 }, { opacity: 0, offset: (INTRO - .9) / TOTAL }, { opacity: 1, offset: INTRO / TOTAL }, { opacity: 1 }], { duration: ms, fill: 'both' }));
-    anims.push(arrive.animate([{ opacity: 0, transform: 'translateY(14px) scale(.8)' }, { opacity: 0, transform: 'translateY(14px) scale(.8)', offset: (TOTAL - 1.6) / TOTAL }, { opacity: 1, transform: 'none' }], { duration: ms, fill: 'both', easing: 'ease-out' }));
+    var scene = { el: host, range: 'contain' }, E = 'ease-in-out';
+    var add = still ? function (el, f) { el.animate(f, { duration: 1, fill: 'both' }).finish(); } : function (el, f) { scrub(scene, el, f); };
+    if (!still) host.classList.add('on');
+    add(cam, frames);
+    add(tilt, [{ transform: 'rotateX(0deg)', offset: 0, easing: E }, { transform: 'rotateX(34deg)', offset: INTRO / TOTAL }, { transform: 'rotateX(34deg)', offset: (INTRO + RIDE) / TOTAL, easing: E }, { transform: 'rotateX(24deg)', offset: 1 }]);
+    add(me, [{ opacity: 0, offset: 0 }, { opacity: 0, offset: (INTRO - .9) / TOTAL }, { opacity: 1, offset: INTRO / TOTAL }, { opacity: 1, offset: 1 }]);
+    add(pin, [{ opacity: 0, transform: 'translateY(14px) scale(.8)', offset: 0 }, { opacity: 0, transform: 'translateY(14px) scale(.8)', offset: (TOTAL - 1.4) / TOTAL }, { opacity: 1, transform: 'none', offset: (TOTAL - .3) / TOTAL }, { opacity: 1, transform: 'none', offset: 1 }]);
     // Dots appear behind the traveller
     var frag = document.createDocumentFragment();
-    for (var d = 14; d < LEN; d += 30) {
-      var q = at(d), el = document.createElement('i'), u = 0, lo = 0, hi = 1;
+    for (var d = 14; d < LEN; d += 44) {
+      var q = at(d), el = document.createElement('i'), lo = 0, hi = 1;
       el.style.left = q[0].toFixed(1) + 'px'; el.style.top = q[1].toFixed(1) + 'px';
       frag.appendChild(el);
       for (var b = 0; b < 18; b++) { var m = (lo + hi) / 2; if (travel(m) * LEN < d) lo = m; else hi = m; }
-      anims.push(el.animate([{ opacity: 0, transform: 'scale(.2)' }, { opacity: .9, transform: 'none' }], { duration: 500, delay: (INTRO + lo * RIDE) * 1000, fill: 'both', easing: 'ease-out' }));
+      var a0 = (INTRO + lo * RIDE) / TOTAL, a1 = Math.min(1, a0 + .025);
+      add(el, [{ opacity: 0, transform: 'scale(.2)', offset: 0 }, { opacity: 0, transform: 'scale(.2)', offset: a0 }, { opacity: .9, transform: 'none', offset: a1 }, { opacity: .9, transform: 'none', offset: 1 }]);
     }
     cam.appendChild(frag);
-    anims.forEach(function (a) { a.pause(); });
-    var navRoad = $('navRoad'), navDist = $('navDist'), navIc = $('navIc'), navState = '', raf = 0, playing = false, begun = false;
+    var navRoad = $('navRoad'), navDist = $('navDist'), navIc = $('navIc'), navState = '';
     var ARROW = '<path d="M12 4v15M6 13l6 6 6-6"/>', DONE = '<path d="M12 21c-4.500-5-7-8-7-11a7 7 0 0 1 14 0c0 3-2.500 6-7 11Z"/><circle cx="12" cy="10" r="2.400"/>';
-    function nav() {
-      var t = anims[0].currentTime / 1000, rem = (1 - sAt(t) / LEN) * METRES, state = t >= INTRO + RIDE ? 'done' : rem < 450 ? 'near' : 'road';
+    function nav(t) {
+      var rem = (1 - sAt(t) / LEN) * METRES, state = t >= INTRO + RIDE ? 'done' : rem < 450 ? 'near' : 'road';
       if (state !== navState) {
         navState = state;
         navIc.innerHTML = state === 'done' ? DONE : ARROW;
@@ -1004,21 +1060,11 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
       }
       var txt = state === 'done' ? '' : kh((Math.round(rem / 50) * 50).toLocaleString('en-US')) + ' ម៉ែត្រ';
       if (navDist.textContent !== txt) navDist.textContent = txt;
-      if (t >= TOTAL) { replay.classList.add('on'); playing = false; return; }
-      if (playing) setTimeout(nav, 200);
     }
-    function play() { if (playing) return; playing = true; begun = true; anims.forEach(function (a) { a.play(); }); nav(); }
-    function hold() { if (!playing) return; playing = false; anims.forEach(function (a) { a.pause(); }); }
-    if (still) { anims.forEach(function (a) { a.finish(); }); nav(); return; }
-    nav();
-    new IntersectionObserver(function (es) {
-      if (es[0].isIntersecting && !(begun && anims[0].currentTime >= ms)) { (img.decode ? img.decode().catch(function () {}) : Promise.resolve()).then(play); } else hold();
-    }, { threshold: .55 }).observe(stage);
-    replay.addEventListener('click', function () {
-      replay.classList.remove('on'); navState = '';
-      anims.forEach(function (a) { a.currentTime = 0; }); playing = false; play();
-    });
-    window.__mapDebug = { seek: function (v) { hold(); anims.forEach(function (a) { a.currentTime = v * 1000; }); nav(); }, TOTAL: TOTAL };
+    if (still) { nav(TOTAL); return; }
+    scene.run = function (y) { nav(progress(this, y) * TOTAL); };
+    nav(0);
+    scenes.push(scene);
   }
 
   // ---- Section menu: appears when the guest scrolls back up
