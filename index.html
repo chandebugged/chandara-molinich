@@ -247,6 +247,20 @@ button { -webkit-tap-highlight-color: transparent; }
 .anim .foot-photo img.ph { transform: scale(1.14); transition: opacity .9s ease, transform 8s cubic-bezier(.2, .6, .3, 1); }
 .anim footer.in .foot-photo img.ph { transform: none; }
 
+/* Photo galleries stay where they are while the page scrolls, and move sideways only by hand */
+.story.ribbon .story-stage { --w: min(80vw, calc((var(--stable, 100vh) - 90px) * .6667)); display: flex; gap: 12px; overflow-x: auto; overflow-y: hidden; padding-inline: calc(50% - var(--w) / 2); scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none; }
+.story.ribbon .story-stage::-webkit-scrollbar { display: none; }
+.story.ribbon .layer { flex: none; width: var(--w); scroll-snap-align: center; scroll-snap-stop: always; opacity: .45; transform: scale(.94); transition: opacity .5s ease, transform .6s var(--slow); }
+.story.ribbon .layer.cur { opacity: 1; transform: none; }
+.story.ribbon .layer img { width: 100%; height: auto; max-width: none; max-height: none; aspect-ratio: 2 / 3; object-fit: contain; }
+.swipe-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 12px; min-height: 5px; }
+.swipe-dots { display: flex; gap: 7px; }
+.swipe-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); opacity: .3; transition: opacity .5s ease; }
+.swipe-dots i.cur { opacity: 1; }
+.swipe-go { display: none; width: 34px; height: 34px; padding: 0; border-radius: 50%; border: 1px solid var(--hair); background: none; color: var(--ink); font: 300 1.1rem/1 var(--ui); cursor: pointer; transition: background-color .4s ease; }
+.swipe-go:hover { background: rgba(224, 195, 137, .12); }
+@media (hover: hover) and (pointer: fine) { .swipe-go { display: block; } }
+
 /* Contact */
 .contact { display: grid; gap: 8px; justify-items: center; margin-top: 18px; }
 .contact a { display: inline-block; width: 210px; text-align: center; padding: 5px 12px; border: 1px solid var(--hair); text-decoration: none; font: 500 1.02rem/1.8 var(--lat); font-variant-numeric: lining-nums; letter-spacing: .06em; color: var(--ink); white-space: nowrap; }
@@ -513,7 +527,7 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     </div>
   </section>
 
-  <section class="story ribbon" data-from="left" style="--pin:195" aria-label="រូបថតក្នុងស្ទូឌីយោ">
+  <section class="story ribbon" style="--pin:195" aria-label="រូបថតក្នុងស្ទូឌីយោ">
     <div class="story-stage">
       <div class="layer"><img class="ph" loading="lazy" src="ph-studio-hands.jpg" alt="កូនកំលោះ និងកូនក្រមុំកាន់ដៃគ្នា ក្នុងស្ទូឌីយោ" decoding="async"></div>
       <div class="layer"><img class="ph" loading="lazy" src="ph-studio-look.jpg" alt="កូនកំលោះ និងកូនក្រមុំមើលមុខគ្នា" decoding="async"></div>
@@ -594,10 +608,9 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     <p class="gift-who" id="saveQrNote" lang="en" role="status" hidden>Press and hold the QR code above, then choose Save to Photos.</p>
   </section>
 
-  <section class="story ribbon" data-from="left" style="--pin:195" aria-label="រូបថតលេងសើច">
+  <section class="story ribbon" style="--pin:130" aria-label="រូបថតលេងសើច">
     <div class="story-stage">
       <div class="layer"><img class="ph" loading="lazy" src="ph-bed.jpg" alt="កូនកំលោះ និងកូនក្រមុំអង្គុយលើគ្រែ ថតរូបជាមួយគ្នា" decoding="async"></div>
-      <div class="layer"><img class="ph" loading="lazy" src="ph-jump.jpg" alt="កូនក្រមុំលោតលើគ្រែ វាយខ្នើយជាមួយកូនកំលោះ" decoding="async"></div>
       <div class="layer"><img class="ph" loading="lazy" src="ph-cream-head.jpg" alt="កូនកំលោះដាក់ដៃលើក្បាលកូនក្រមុំ" decoding="async"></div>
       <div class="layer"><img class="ph" loading="lazy" src="ph-cream-pose.jpg" alt="កូនកំលោះ និងកូនក្រមុំញញឹម ដាក់ដៃទ្រចង្កា" decoding="async"></div>
     </div>
@@ -947,6 +960,34 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
   function ask() { if (!looping) { looping = true; requestAnimationFrame(tick); } }
 
   var dockFrame = function () {};
+  // ---- Photo galleries: moved by hand only. The photo resting in the middle comes forward, and the dots show where you are
+  function startGalleries() {
+    document.querySelectorAll('.story.ribbon').forEach(function (el) {
+      var stage = el.querySelector('.story-stage'), layers = [].slice.call(stage.querySelectorAll('.layer')), nav = document.createElement('div'), at = 0, pending = false;
+      nav.className = 'swipe-nav';
+      nav.innerHTML = '<button class="swipe-go" type="button" aria-label="រូបមុន">‹</button><div class="swipe-dots" aria-hidden="true">' + layers.map(function () { return '<i></i>'; }).join('') + '</div><button class="swipe-go" type="button" aria-label="រូបបន្ទាប់">›</button>';
+      el.appendChild(nav);
+      var marks = nav.querySelector('.swipe-dots').children, go = nav.querySelectorAll('.swipe-go');
+      function show(i) {
+        at = i;
+        layers.forEach(function (ly, k) { ly.classList.toggle('cur', k === i); marks[k].classList.toggle('cur', k === i); });
+      }
+      function sync() {
+        pending = false;
+        var i = Math.max(0, Math.min(layers.length - 1, Math.round(stage.scrollLeft / (layers[0].offsetWidth + 12))));
+        if (i !== at) show(i);
+      }
+      function step(d) {
+        var ly = layers[Math.max(0, Math.min(layers.length - 1, at + d))];
+        stage.scrollTo({ left: ly.offsetLeft - (stage.clientWidth - ly.offsetWidth) / 2, behavior: still ? 'auto' : 'smooth' });
+      }
+      go[0].addEventListener('click', function () { step(-1); });
+      go[1].addEventListener('click', function () { step(1); });
+      show(0);
+      stage.addEventListener('scroll', function () { if (!pending) { pending = true; requestAnimationFrame(sync); } }, { passive: true });
+    });
+  }
+
   // ---- Touch screens: motion runs on a clock, started by the photo or card coming into view
   function startTouchMotion() {
     var IO = 'IntersectionObserver' in window, anim = root.classList.contains('anim');
@@ -965,6 +1006,7 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
     started = true;
     showHero();
     document.querySelectorAll('.rv').forEach(function (el) { if (seen) seen.observe(el); else el.classList.add('in'); });
+    startGalleries();
     if (TOUCH) startTouchMotion();
     // A held set needs all its photos ready once it is near, since they pass through one spot
     if ('IntersectionObserver' in window) {
@@ -1013,26 +1055,6 @@ footer > :not(.foot-photo) { position: relative; z-index: 1; }
         return f;
       }
       function rebuild(sc) { (sc.anims || []).forEach(function (a) { a.cancel(); }); sc.anims = []; }
-      // Ribbon: photos side by side; the one in the middle comes forward, its neighbours wait at the edges
-      document.querySelectorAll('.story.ribbon').forEach(function (el) {
-        var stage = el.querySelector('.story-stage'), layers = [].slice.call(el.querySelectorAll('.layer')), n = layers.length, GAP = 16, side = el.dataset.from === 'left' ? -1 : 1, built = '';
-        el.classList.add('on');
-        scenes.push({ el: el, range: 'contain', size: function () {
-          var vw = document.documentElement.clientWidth, w = Math.round(Math.min(vw * .8, (vh - 40) * 2 / 3)), h = Math.round(w * 1.5), key = vw + 'x' + vh;
-          if (key === built) return;
-          built = key;
-          stage.style.height = h + 'px'; stage.style.top = Math.max(0, Math.round((vh - h) / 2)) + 'px';
-          var step = w * .92 + GAP, sc = this;
-          rebuild(sc);
-          layers.forEach(function (ly, k) {
-            ly.style.width = w + 'px'; ly.style.height = h + 'px';
-            scrub(sc, ly, restFrames(n, function (m) {
-              var d = Math.min(1, Math.abs(k - m)), x = vw / 2 - w / 2 + side * (k - m) * step;
-              return { transform: 'translate3d(' + x.toFixed(1) + 'px,0,0) scale(' + (1 - d * .16).toFixed(3) + ')', opacity: 1 - d * .55 };
-            }));
-          });
-        } });
-      });
       // Moving edge: a thin line of the page passes up the screen and uncovers the next photo, which stays still as it does
       document.querySelectorAll('.story.wipe').forEach(function (el) {
         var stage = el.querySelector('.story-stage'), layers = [].slice.call(el.querySelectorAll('.layer')), n = layers.length, GAP = 16, built = '';
